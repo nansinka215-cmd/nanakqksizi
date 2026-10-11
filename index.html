@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Мой милый кролик</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI', cursive, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #a1c4fd, #c2e9fb);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background 1.5s ease;
+        }
+
+        body.night {
+            background: linear-gradient(to bottom, #141e30, #243b55);
+        }
+
+        #game-card {
+            width: 92%;
+            max-width: 380px;
+            height: 94vh;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 15px;
+            position: relative;
+            border: 4px solid #fff;
+            transition: background 1.5s ease, border-color 1.5s ease;
+        }
+
+        body.night #game-card {
+            background: rgba(30, 41, 59, 0.85);
+            border-color: #334155;
+            color: white;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #ff6b81;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        body.night h1 {
+            color: #ff9ff3;
+        }
+
+        .pet-name {
+            font-size: 16px;
+            color: #70a1ff;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        /* Шкалы */
+        .stats-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 10px;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        body.night .stat-box {
+            background: rgba(51, 65, 85, 0.9);
+        }
+
+        .stat-label {
+            font-size: 13px;
+            margin-bottom: 4px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        body.night .stat-label {
+            color: #cbd5e1;
+        }
+
+        .bar-bg {
+            width: 100%;
+            height: 12px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        body.night .bar-bg {
+            background: #475569;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 100%;
+            border-radius: 10px;
+            transition: width 0.4s ease, background 0.4s ease;
+        }
+
+        #satiety-bar { background: #ff7675; }
+        #water-bar { background: #74b9ff; }
+        #happiness-bar { background: #fdcb6e; }
+        #energy-bar { background: #a29bfe; }
+
+        /* Зона кролика */
+        .pet-area {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .rabbit-svg {
+            width: 170px;
+            height: 170px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.1));
+        }
+
+        .rabbit-svg:active {
+            transform: scale(0.95);
+        }
+
+        /* Эффекты */
+        .floating-effect {
+            position: absolute;
+            font-size: 28px;
+            pointer-events: none;
+            animation: floatUp 1.2s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(0.8); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.3); }
+        }
+
+        /* Кнопки */
+        .controls-grid {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            border: none;
+            outline: none;
+            padding: 14px 10px;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.1s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-feed { background: linear-gradient(135deg, #ff7675, #d63031); }
+        .btn-drink { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+        .btn-pet { background: linear-gradient(135deg, #fd79a8, #e84393); }
+        .btn-sleep { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+    </style>
+</head>
+<body>
+
+<div id="game-card">
+    <div style="text-align: center;">
+        <h1>Мой милый кролик</h1>
+        <div class="pet-name">✨ Каору ✨</div>
+    </div>
+
+    <!-- Индикаторы -->
+    <div class="stats-container">
+        <div class="stat-box">
+            <div class="stat-label"><span>🍎 Еда</span><span id="satiety-val">100%</span></div>
+            <div class="bar-bg"><div id="satiety-bar" class="bar-fill"></div></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label"><span>💧 Вода</span><span id="water-val">100%</span></div>
+            <div class="bar-bg"><div id="water-bar" class="bar-fill"></div></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label"><span>💖 Счастье</span><span id="happiness-val">100%</span></div>
+            <div class="bar-bg"><div id="happiness-bar" class="bar-fill"></div></div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label"><span>🌙 Сон</span><span id="energy-val">100%</span></div>
+            <div class="bar-bg"><div id="energy-bar" class="bar-fill"></div></div>
+        </div>
+    </div>
+
+    <!-- Персонаж -->
+    <div class="pet-area" id="pet-area">
+        <svg class="rabbit-svg" id="rabbit" viewBox="0 0 200 200" onclick="petRabbit()">
+            <!-- Ушки -->
+            <ellipse cx="75" cy="45" rx="14" ry="40" fill="#f5cd79" transform="rotate(-10 75 45)"/>
+            <ellipse cx="75" cy="45" rx="8" ry="30" fill="#f8a5c2" transform="rotate(-10 75 45)"/>
+            
+            <ellipse cx="125" cy="45" rx="14" ry="40" fill="#f5cd79" transform="rotate(10 125 45)"/>
+            <ellipse cx="125" cy="45" rx="8" ry="30" fill="#f8a5c2" transform="rotate(10 125 45)"/>
+
+            <!-- Тело и пузико -->
+            <circle cx="100" cy="135" r="45" fill="#f5cd79" />
+            <circle cx="100" cy="138" r="32" fill="#ffffff" />
+
+            <!-- Голова -->
+            <circle cx="100" cy="95" r="42" fill="#f5cd79" />
+
+            <!-- Щёчки -->
+            <circle cx="78" cy="104" r="7" fill="#f8a5c2" opacity="0.6"/>
+            <circle cx="122" cy="104" r="7" fill="#f8a5c2" opacity="0.6"/>
+
+            <!-- Глазки (Открытые/Закрытые) -->
+            <g id="eyes-open">
+                <circle cx="82" cy="92" r="5" fill="#303952" />
+                <circle cx="80" cy="90" r="1.8" fill="#ffffff" />
+                <circle cx="118" cy="92" r="5" fill="#303952" />
+                <circle cx="116" cy="90" r="1.8" fill="#ffffff" />
+            </g>
+            <g id="eyes-closed" style="display: none;">
+                <path d="M 77 93 Q 82 98 87 93" stroke="#303952" stroke-width="3" fill="none" stroke-linecap="round"/>
+                <path d="M 113 93 Q 118 98 123 93" stroke="#303952" stroke-width="3" fill="none" stroke-linecap="round"/>
+            </g>
+
+            <!-- Носик и ротик -->
+            <polygon points="97,98 103,98 100,102" fill="#f8a5c2" />
+            <path d="M 96 104 Q 100 108 104 104" stroke="#778ca3" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+            <!-- Лапки -->
+            <ellipse cx="78" cy="170" rx="12" ry="7" fill="#f5cd79" />
+            <ellipse cx="122" cy="170" rx="12" ry="7" fill="#f5cd79" />
+            <ellipse cx="80" cy="135" rx="7" ry="12" fill="#f5cd79" />
+            <ellipse cx="120" cy="135" rx="7" ry="12" fill="#f5cd79" />
+        </svg>
+    </div>
+
+    <!-- Кнопки -->
+    <div class="controls-grid">
+        <button class="btn btn-feed" onclick="feed()">🍎 Покормить</button>
+        <button class="btn btn-drink" onclick="drink()">💧 Попоить</button>
+        <button class="btn btn-pet" onclick="petRabbit()">💖 Погладить</button>
+        <button class="btn btn-sleep" onclick="toggleSleep()">🌙 Спать</button>
+    </div>
+</div>
+
+<script>
+    let stats = { satiety: 100, water: 100, happiness: 100, energy: 100 };
+    let isSleeping = false;
+
+    function updateBars() {
+        for (let key in stats) {
+            stats[key] = Math.max(0, Math.min(100, stats[key]));
+            document.getElementById(`${key}-bar`).style.width = stats[key] + '%';
+            document.getElementById(`${key}-val`).innerText = Math.round(stats[key]) + '%';
+        }
+    }
+
+    // Постепенное уменьшение показателей
+    setInterval(() => {
+        if (!isSleeping) {
+            stats.satiety -= 0.8;
+            stats.water -= 1.0;
+            stats.happiness -= 0.6;
+            stats.energy -= 0.5;
+        } else {
+            stats.energy += 3.0;
+            stats.satiety -= 0.3;
+            stats.water -= 0.3;
+            if (stats.energy >= 100) {
+                toggleSleep(); // Просыпается
+            }
+        }
+        updateBars();
+    }, 2000);
+
+    function showEffect(emoji) {
+        const area = document.getElementById('pet-area');
+        const effect = document.createElement('div');
+        effect.className = 'floating-effect';
+        effect.innerText = emoji;
+        effect.style.left = (Math.random() * 80 + 60) + 'px';
+        effect.style.top = (Math.random() * 40 + 60) + 'px';
+        area.appendChild(effect);
+        setTimeout(() => effect.remove(), 1200);
+    }
+
+    function feed() {
+        if (isSleeping) return;
+        stats.satiety += 20;
+        stats.happiness += 5;
+        showEffect('🥕');
+        updateBars();
+    }
+
+    function drink() {
+        if (isSleeping) return;
+        stats.water += 25;
+        stats.happiness += 5;
+        showEffect('💧');
+        updateBars();
+    }
+
+    function petRabbit() {
+        if (isSleeping) return;
+        stats.happiness += 15;
+        showEffect('💖');
+        updateBars();
+    }
+
+    function toggleSleep() {
+        isSleeping = !isSleeping;
+        const body = document.body;
+        const openEyes = document.getElementById('eyes-open');
+        const closedEyes = document.getElementById('eyes-closed');
+
+        if (isSleeping) {
+            body.classList.add('night');
+            openEyes.style.display = 'none';
+            closedEyes.style.display = 'block';
+            showEffect('Zzz...');
+        } else {
+            body.classList.remove('night');
+            openEyes.style.display = 'block';
+            closedEyes.style.display = 'none';
+            showEffect('☀️');
+        }
+    }
+</script>
+
+</body>
+</html>
